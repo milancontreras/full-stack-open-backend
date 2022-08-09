@@ -1,8 +1,26 @@
 const http = require('http')
 const express = require('express')
+const morgan = require('morgan')
 const { response } = require('express')
+const { allowedNodeEnvironmentFlags } = require('process')
+
+morgan.token('body', function (req) { return JSON.stringify(req.body) })
+
 const app = express()
+
+
 app.use(express.json())
+app.use( morgan(function (tokens, req, res) {
+  return [
+    tokens.method(req, res),
+    tokens.url(req, res),
+    tokens.status(req, res),
+    tokens.res(req, res, 'content-length'), '-',
+    tokens['response-time'](req, res), 'ms',
+    tokens.body(req, 'body')!=='{}' ? tokens.body(req, 'body'): null
+  ].join(' ')
+}))
+
 
 let persons = [
   {
@@ -61,13 +79,10 @@ const generateId = () => {
 }
 
 
-app.post('/api/persons',(request, response)=>{
+app.post('/api/persons' ,(request, response)=>{
 
   const body = request.body
-  console.log("body body:",body)
-  console.log("body name:",body.name)
-  console.log("body number:",body.number)
-  
+
   if((!body.name)){
     return response.status(400).json({ 
       error: 'name is missing' 
@@ -77,7 +92,8 @@ app.post('/api/persons',(request, response)=>{
     return response.status(400).json({ 
       error: 'number is missing' 
     })
-  }else if(persons.find(person=> person.name = body.number)){
+
+  }else if(persons.find(person => person.name === body.name)){
     return response.status(400).json({ 
       error: 'name must be unique' 
     })
@@ -102,6 +118,7 @@ app.get('/info',(request, response) => {
     </div>
   `)
 })
+
 
 
 const PORT = 3001
