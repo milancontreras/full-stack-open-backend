@@ -26,7 +26,7 @@ const Person = mongoose.model('Person', personSchema)
 if(!inputName || !inputNumber){
 
   Person.find({}).then(result => {
-    console.log("phonebook: ")
+    console.log('phonebook: ')
     result.forEach(person => {
       console.log(`${person.name} ${person.number}`)
     })
@@ -38,13 +38,12 @@ if(!inputName || !inputNumber){
     name: inputName,
     number: inputNumber,
   })
-  
+
   person.save().then(result => {
     //console.log(result)
     console.log(`added ${result.name} number ${result.number} to phonebook`)
     mongoose.connection.close()
   })
-  
 }
 
 

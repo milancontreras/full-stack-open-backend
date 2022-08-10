@@ -1,11 +1,9 @@
-const http = require('http')
+//const http = require('http')
 const express = require('express')
 const morgan = require('morgan')
-const cors = require('cors') 
-const { response } = require('express')
-const { allowedNodeEnvironmentFlags } = require('process')
-const Person = require("./models/person")
-const { resourceLimits } = require('worker_threads')
+const cors = require('cors')
+const Person = require('./models/person')
+//const process = require('process')
 
 //const password = ps.passwordMongo
 //const ps = require('./password.js')
@@ -38,68 +36,60 @@ app.get('/',(request, response) => {
 app.get('/api/persons',(request, response) => {
   //response.json(persons)
   Person.find({}).then(result => {
-      response.json(result)
-    })
+    response.json(result)
+  })
 
 })
 
 app.get('/api/persons/:id',(request, response,next) => {
   Person.findById(request.params.id)
-  .then(person => {
-    if(person){
-      response.json(person)
-    }else{
-      response.status(404).json({
-        error: 'Value not found'
-      }).end()
-    }
-  })
-  .catch(error => next(error))
-  
-})
-
-app.delete('/api/persons/:id',(request, response,next)=>{
-
-  Person.findByIdAndRemove(request.params.id)
-  .then(result =>{
-    response.status(204).end()
-  })
-  .catch(error => next(error))
-})
-
-app.post('/api/persons' ,(request, response,next)=>{
-  const body = request.body
-
-    const newPerson = new Person({
-      name: body.name,
-      number: body.number,
-    })
-
-    newPerson.save().then(person => {
-      //console.log('person saved!')
-      response.json(person)
+    .then(person => {
+      if(person){
+        response.json(person)
+      }else{
+        response.status(404).json({
+          error: 'Value not found'
+        }).end()
+      }
     })
     .catch(error => next(error))
-
 })
 
-app.put('/api/persons/:id' ,(request, response ,next)=>{
-  const body = request.body
+app.delete('/api/persons/:id',(request, response,next) => {
+  Person.findByIdAndRemove(request.params.id)
+    .then(() => {
+      response.status(204).end()
+    })
+    .catch(error => next(error))
+})
 
+app.post('/api/persons' ,(request, response,next) => {
+  const body = request.body
+  const newPerson = new Person({
+    name: body.name,
+    number: body.number,
+  })
+
+  newPerson.save().then(person => {
+    response.json(person)
+  })
+    .catch(error => next(error))
+})
+
+app.put('/api/persons/:id' ,(request, response ,next) => {
+  const body = request.body
   const person = {
     name: body.name,
     number: body.number
   }
 
-  Person.findByIdAndUpdate(request.params.id, person, { new: true})
-    .then(updatedNote =>{
-
+  Person.findByIdAndUpdate(request.params.id, person, { new: true })
+    .then( updatedNote => {
       if(updatedNote){
         response.json(updatedNote)
       }else{
         response.status(204).end()
       }
-      
     })
     .catch(error => next(error))
 })
@@ -107,7 +97,7 @@ app.put('/api/persons/:id' ,(request, response ,next)=>{
 app.get('/info',(request, response) => {
 
   Person.find({})
-    .then(persons =>{
+    .then(persons => {
       response.send(
         `<div>
           <p>Phonebook has info for ${persons.length} people</p>
@@ -116,7 +106,6 @@ app.get('/info',(request, response) => {
       )
 
     })
-  
 })
 
 
@@ -140,6 +129,6 @@ const errorHandler = (error, request, response, next) => {
 app.use(errorHandler)
 
 
-const PORT = process.env.PORT || 3001
+const PORT = process.env.PORT
 app.listen(PORT)
 console.log(`Server running on port ${PORT}`)
